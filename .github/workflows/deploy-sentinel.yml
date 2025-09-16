@@ -33,8 +33,8 @@ jobs:
           echo "Deploying Analytics Rule: $file"
           RULE_NAME=$(basename "$file" .json)
           az sentinel alert-rule create \
-            --resource-group $RESOURCE_GROUP \
-            --workspace-name $WORKSPACE_NAME \
+            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
+            --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
             --rule-name $RULE_NAME \
             --kind Scheduled \
             --properties @$file
