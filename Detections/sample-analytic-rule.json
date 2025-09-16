@@ -1,14 +1,19 @@
 {
   "properties": {
-    "displayName": "Suspicious Sign-in from Unknown Location",
+    "displayName": "Suspicious Process Creation",
+    "description": "This rule detects suspicious process creation events (Event ID 4688 with PowerShell).",
+    "severity": "Medium",
     "enabled": true,
-    "query": "SigninLogs | where ResultType == 0 and Location !in ('Pakistan','USA')",
+    "query": "SecurityEvent | where EventID == 4688 | where NewProcessName has 'powershell.exe'",
     "queryFrequency": "PT1H",
     "queryPeriod": "PT1H",
     "triggerOperator": "GreaterThan",
     "triggerThreshold": 0,
-    "severity": "High",
-    "tactics": ["InitialAccess"],
+    "suppressionDuration": "PT1H",
+    "suppressionEnabled": false,
+    "tactics": [
+      "Execution"
+    ],
     "kind": "Scheduled"
   }
 }
