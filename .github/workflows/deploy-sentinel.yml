@@ -34,8 +34,8 @@ jobs:
         for file in ./Detections/*.json; do
           echo "Deploying $file"
           az sentinel alert-rule create \
-            --resource-group <RESOURCE_GROUP> \
-            --workspace-name <SENTINEL_WORKSPACE> \
+            --resource-group sentinel-rg \
+            --workspace-name Workspace1 \
             --rule-id $(basename $file .json) \
             --body @"$file"
         done
