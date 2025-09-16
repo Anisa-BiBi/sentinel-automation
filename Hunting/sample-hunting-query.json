@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "displayName": "Hunting Suspicious PowerShell Usage",
+    "query": "SecurityEvent | where EventID == 4104 and CommandLine contains 'Invoke-WebRequest'",
+    "tactics": ["Execution"],
+    "description": "Detects suspicious PowerShell activity in logs."
+  }
+}

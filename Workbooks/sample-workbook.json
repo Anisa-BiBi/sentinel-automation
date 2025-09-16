@@ -1,0 +1,6 @@
+{
+  "properties": {
+    "displayName": "Failed Sign-in Workbook",
+    "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"SigninLogs | where ResultType != 0 | summarize count() by Location\"}}]}"
+  }
+}

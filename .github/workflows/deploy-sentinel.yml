@@ -1,0 +1,102 @@
+name: Deploy Microsoft Sentinel as Code
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Checkout repo
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # 2. Login to Azure with Service Principal
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        # Store a JSON secret like:
+        # {"clientId":"xxxx","clientSecret":"xxxx","subscriptionId":"xxxx","tenantId":"xxxx"}
+
+    # 3. Set subscription
+    - name: Set Subscription
+      run: az account set --subscription ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
+
+    # 4. Deploy Analytics Rules
+    - name: Deploy Analytics Rules
+      run: |
+        for file in ./Detections/*.json; do
+          echo "Deploying $file"
+          az sentinel alert-rule create \
+            --resource-group <RESOURCE_GROUP> \
+            --workspace-name <SENTINEL_WORKSPACE> \
+            --rule-id $(basename $file .json) \
+            --location <LOCATION> \
+            --content $(cat $file)
+        done
+
+    # 5. Deploy Hunting Queries
+    - name: Deploy Hunting Queries
+      run: |
+        for file in ./Hunting/*.json; do
+          echo "Deploying $file"
+          az sentinel hunting-query create \
+            --resource-group <RESOURCE_GROUP> \
+            --workspace-name <SENTINEL_WORKSPACE> \
+            --query-id $(basename $file .json) \
+            --location <LOCATION> \
+            --content $(cat $file)
+        done
+
+    # 6. Deploy Parsers
+    - name: Deploy Parsers
+      run: |
+        for file in ./Parsers/*.json; do
+          echo "Deploying $file"
+          az monitor log-analytics solution update \
+            --resource-group <RESOURCE_GROUP> \
+            --workspace-name <SENTINEL_WORKSPACE> \
+            --solution $(basename $file .json) \
+            --content $(cat $file)
+        done
+
+    # 7. Deploy Playbooks (Logic Apps)
+    - name: Deploy Playbooks
+      run: |
+        for file in ./Playbooks/*.json; do
+          echo "Deploying Playbook $file"
+          az deployment group create \
+            --resource-group <RESOURCE_GROUP> \
+            --template-file $file
+        done
+
+    # 8. Deploy Workbooks
+    - name: Deploy Workbooks
+      run: |
+        for file in ./Workbooks/*.json; do
+          echo "Deploying Workbook $file"
+          az monitor log-analytics workbook create \
+            --resource-group <RESOURCE_GROUP> \
+            --workspace-name <SENTINEL_WORKSPACE> \
+            --display-name $(basename $file .json) \
+            --location <LOCATION> \
+            --source $(cat $file)
+        done
+
+    # 9. Deploy Automation Rules
+    - name: Deploy Automation Rules
+      run: |
+        for file in ./AutomationRules/*.json; do
+          echo "Deploying Automation Rule $file"
+          az sentinel automation-rule create \
+            --resource-group <RESOURCE_GROUP> \
+            --workspace-name <SENTINEL_WORKSPACE> \
+            --rule-id $(basename $file .json) \
+            --location <LOCATION> \
+            --content $(cat $file)
+        done

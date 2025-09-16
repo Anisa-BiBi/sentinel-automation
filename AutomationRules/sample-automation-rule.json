@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "displayName": "Auto Close False Positive Alerts",
+    "order": 1,
+    "triggeringConditions": [
+      {
+        "conditionType": "IncidentCreated",
+        "conditionProperties": []
+      }
+    ],
+    "actions": [
+      {
+        "order": 1,
+        "actionType": "ModifyIncident",
+        "actionConfiguration": {
+          "status": "Closed",
+          "classification": "FalsePositive",
+          "classificationComment": "Auto-closed by rule"
+        }
+      }
+    ]
+  }
+}

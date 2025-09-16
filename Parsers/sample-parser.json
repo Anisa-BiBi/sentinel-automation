@@ -1,0 +1,4 @@
+{
+  "parserName": "CustomDNSLogs",
+  "query": "DnsEvents | project TimeGenerated, Computer, QueryName, QueryType, ResponseCode"
+}

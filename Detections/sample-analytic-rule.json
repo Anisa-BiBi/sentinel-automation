@@ -1,0 +1,14 @@
+{
+  "properties": {
+    "displayName": "Suspicious Sign-in from Unknown Location",
+    "enabled": true,
+    "query": "SigninLogs | where ResultType == 0 and Location !in ('Pakistan','USA')",
+    "queryFrequency": "PT1H",
+    "queryPeriod": "PT1H",
+    "triggerOperator": "GreaterThan",
+    "triggerThreshold": 0,
+    "severity": "High",
+    "tactics": ["InitialAccess"],
+    "kind": "Scheduled"
+  }
+}
