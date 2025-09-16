@@ -30,15 +30,16 @@ jobs:
     # 4. Deploy Analytics Rules
     - name: Deploy Analytics Rules
       run: |
+        az extension add --name sentinel --allow-preview true
         for file in ./Detections/*.json; do
           echo "Deploying $file"
           az sentinel alert-rule create \
-            --resource-group sentinel-rg \
-            --workspace-name Workspace1 \
+            --resource-group <RESOURCE_GROUP> \
+            --workspace-name <SENTINEL_WORKSPACE> \
             --rule-id $(basename $file .json) \
-            --location Central India \
-            --content $(cat $file)
+            --body @"$file"
         done
+
 
     # 5. Deploy Hunting Queries
     - name: Deploy Hunting Queries
