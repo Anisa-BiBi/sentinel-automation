@@ -1,6 +1,6 @@
 {
   "properties": {
-    "displayName": "Suspicious Process Creation",
+    "displayName": "Suspicious Process's Creation",
     "description": "This rule detects suspicious process creation events (Event ID 4688 with PowerShell).",
     "severity": "Medium",
     "enabled": true,
