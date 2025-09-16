@@ -1,108 +1,32 @@
-name: Deploy Sentinel Content
+name: Deploy Sentinel Artifacts
 
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: [ main ]
+    paths:
+      - 'Detections/**'
+      - 'Hunting/**'
+      - 'Workbooks/**'
+      - 'Playbooks/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout Repo
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Azure Login
       - name: Login to Azure
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 3. Setup Sentinel Extension
-      - name: Setup Azure CLI for Sentinel
-        run: |
-          az config set extension.dynamic_install_allow_preview=true
-          az extension add --name sentinel --allow-preview true
-
-      # 4. Deploy Analytics Rules
       - name: Deploy Analytics Rules
         run: |
           for file in ./Detections/*.json; do
-          echo "Deploying Analytics Rule: $file"
-          RULE_NAME=$(basename "$file" .json)
-          az sentinel alert-rule create \
-            --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-            --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
-            --rule-name $RULE_NAME \
-            --kind Scheduled \
-            --properties @$file
-            done
-
-      # 5. Deploy Hunting Queries
-      - name: Deploy Hunting Queries
-        run: |
-          for file in ./Hunting/*.json; do
-            [ -f "$file" ] || continue
-            echo "Deploying Hunting Query: $file"
-            az sentinel hunting-query create \
+            echo "Deploying $file"
+            az sentinel alert-rule create \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
-              --name $(basename $file .json) \
-              --body @"$file"
+              --rule-file $file
           done
-
-      # 6. Deploy Parsers
-      - name: Deploy Parsers
-        run: |
-          for file in ./Parsers/*.json; do
-            [ -f "$file" ] || continue
-            echo "Deploying Parser: $file"
-            az sentinel data-connector create \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
-              --name $(basename $file .json) \
-              --body @"$file"
-          done
-
-      # 7. Deploy Automation Rules
-      - name: Deploy Automation Rules
-        run: |
-          for file in ./AutomationRules/*.json; do
-            [ -f "$file" ] || continue
-            echo "Deploying Automation Rule: $file"
-            az sentinel automation-rule create \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
-              --name $(basename $file .json) \
-              --body @"$file"
-          done
-
-      # 8. Deploy Workbooks
-      - name: Deploy Workbooks
-        run: |
-          for file in ./Workbooks/*.json; do
-            [ -f "$file" ] || continue
-            echo "Deploying Workbook: $file"
-            az monitor workbook create \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --name $(basename $file .json) \
-              --location ${{ secrets.AZURE_LOCATION }} \
-              --display-name $(basename $file .json) \
-              --source-id "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ secrets.AZURE_RESOURCE_GROUP }}/providers/Microsoft.OperationalInsights/workspaces/${{ secrets.AZURE_WORKSPACE }}" \
-              --serialized-data @"$file"
-          done
-
-      # 9. Deploy Playbooks (ARM Templates)
-      - name: Deploy Playbooks
-        run: |
-          for file in ./Playbooks/*.json; do
-            [ -f "$file" ] || continue
-            echo "Deploying Playbook: $file"
-            az deployment group create \
-              --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
-              --template-file "$file"
-          done
-
-
