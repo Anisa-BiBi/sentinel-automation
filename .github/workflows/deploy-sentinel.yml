@@ -33,10 +33,10 @@ jobs:
         for file in ./Detections/*.json; do
           echo "Deploying $file"
           az sentinel alert-rule create \
-            --resource-group <RESOURCE_GROUP> \
-            --workspace-name <SENTINEL_WORKSPACE> \
+            --resource-group sentinel-rg \
+            --workspace-name Workspace1 \
             --rule-id $(basename $file .json) \
-            --location <LOCATION> \
+            --location Central India \
             --content $(cat $file)
         done
 
@@ -46,10 +46,10 @@ jobs:
         for file in ./Hunting/*.json; do
           echo "Deploying $file"
           az sentinel hunting-query create \
-            --resource-group <RESOURCE_GROUP> \
-            --workspace-name <SENTINEL_WORKSPACE> \
+            --resource-group sentinel-rg \
+            --workspace-name Workspace1 \
             --query-id $(basename $file .json) \
-            --location <LOCATION> \
+            --location Central India \
             --content $(cat $file)
         done
 
@@ -59,8 +59,8 @@ jobs:
         for file in ./Parsers/*.json; do
           echo "Deploying $file"
           az monitor log-analytics solution update \
-            --resource-group <RESOURCE_GROUP> \
-            --workspace-name <SENTINEL_WORKSPACE> \
+            --resource-group sentinel-rg \
+            --workspace-name Workspace1 \
             --solution $(basename $file .json) \
             --content $(cat $file)
         done
@@ -71,7 +71,7 @@ jobs:
         for file in ./Playbooks/*.json; do
           echo "Deploying Playbook $file"
           az deployment group create \
-            --resource-group <RESOURCE_GROUP> \
+            --resource-group sentinel-rg \
             --template-file $file
         done
 
@@ -81,10 +81,10 @@ jobs:
         for file in ./Workbooks/*.json; do
           echo "Deploying Workbook $file"
           az monitor log-analytics workbook create \
-            --resource-group <RESOURCE_GROUP> \
-            --workspace-name <SENTINEL_WORKSPACE> \
+            --resource-group sentinel-rg \
+            --workspace-name Workspace1 \
             --display-name $(basename $file .json) \
-            --location <LOCATION> \
+            --location Central India \
             --source $(cat $file)
         done
 
@@ -94,9 +94,9 @@ jobs:
         for file in ./AutomationRules/*.json; do
           echo "Deploying Automation Rule $file"
           az sentinel automation-rule create \
-            --resource-group <RESOURCE_GROUP> \
-            --workspace-name <SENTINEL_WORKSPACE> \
+            --resource-group sentinel-rg \
+            --workspace-name Workspace1 \
             --rule-id $(basename $file .json) \
-            --location <LOCATION> \
+            --location <Central India \
             --content $(cat $file)
         done
