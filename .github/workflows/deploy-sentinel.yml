@@ -32,11 +32,14 @@ jobs:
           for file in ./Detections/*.json; do
             [ -f "$file" ] || continue
             echo "Deploying Analytics Rule: $file"
+            RULE_NAME=$(basename "$file" .json)
+
             az sentinel alert-rule create \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
-              --name $(basename $file .json) \
-              --body @"$file"
+              --name "$RULE_NAME" \
+              --location ${{ secrets.AZURE_LOCATION }} \
+              --rule-file "$file"
           done
 
       # 5. Deploy Hunting Queries
@@ -103,4 +106,5 @@ jobs:
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --template-file "$file"
           done
+
 
