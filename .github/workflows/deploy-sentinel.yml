@@ -25,8 +25,23 @@ jobs:
         run: |
           for file in ./Detections/*.json; do
             echo "Deploying $file"
+            RULE_ID=$(basename $file .json)
             az sentinel alert-rule create \
               --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} \
               --workspace-name ${{ secrets.AZURE_WORKSPACE }} \
-              --rule-file $file
+              --rule-id $RULE_ID \
+              --scheduled-alert-rule \
+              --display-name "$(jq -r '.properties.displayName' $file)" \
+              --description "$(jq -r '.properties.description' $file)" \
+              --severity "$(jq -r '.properties.severity' $file)" \
+              --enabled "$(jq -r '.properties.enabled' $file)" \
+              --query "$(jq -r '.properties.query' $file)" \
+              --query-frequency "$(jq -r '.properties.queryFrequency' $file)" \
+              --query-period "$(jq -r '.properties.queryPeriod' $file)" \
+              --trigger-operator "$(jq -r '.properties.triggerOperator' $file)" \
+              --trigger-threshold "$(jq -r '.properties.triggerThreshold' $file)" \
+              --suppression-duration "$(jq -r '.properties.suppressionDuration' $file)" \
+              --suppression-enabled "$(jq -r '.properties.suppressionEnabled' $file)" \
+              --tactics $(jq -r '.properties.tactics[]' $file)
           done
+      
